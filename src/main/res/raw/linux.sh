@@ -1,0 +1,187 @@
+#
+# The configuration of this script.
+#
+# all the files that came with this package (base location)
+BIN=/data/local/debkit
+# location of the image (pref on SD being the biggest size)
+KIT=/sdcard/debian
+# distribution to install
+DST=wheezy
+# the debian source to use
+SRC=ftp.nl.debian.org/debian
+# mount location of the image
+MNT=$BIN/mnt
+# where to install the busybox tools
+BB=$BIN/bin
+# path of the debootstrap stuff
+BS=$BIN/debootstrap
+
+#
+# The script - please don't change things below if you have no clue.
+#
+
+setup_sys()
+{
+	case "$1" in
+	system)
+		echo "Creating directory $KIT..."
+		$BIN/busybox mkdir $KIT
+		echo "Creating directory $MNT..."
+		$BIN/busybox mkdir $MNT
+		echo "Creating directory $BS..."
+		$BIN/busybox mkdir $BS
+		echo "Creating directory $BB..."
+		$BIN/busybox mkdir $BB
+	;;
+	busybox)
+		echo "Installing Busybox in $BB..."
+		$BIN/busybox cp $BIN/busybox $BB/busybox
+		$BB/busybox --install $BB
+		echo "Done."
+	;;
+	debootstrap)
+		echo "Installing Debootstrap in $BS..."
+		$BIN/busybox tar -C $BS -xvf $BIN/data.tar
+		echo "Patching debootstrap to function properly on android..."
+		$BIN/busybox sed -i "474,476d" $BS/usr/sbin/debootstrap
+		$BIN/busybox sed -i "16i                DEBOOTSTRAP_DIR=$BS/usr/share/debootstrap" $BS/usr/sbin/debootstrap
+		$BIN/busybox sed -i "17d" $BS/usr/sbin/debootstrap
+		$BIN/busybox sed -i "1iPATH=/bin:/usr/bin:/sbin:/usr/sbin:/debootstrap:$BB" $BS/usr/sbin/debootstrap
+		$BIN/busybox cp $BIN/pkgdetails $BS/usr/share/debootstrap/pkgdetails
+		$BIN/busybox chmod 777 $BS/usr/share/debootstrap/pkgdetails
+		echo "Done."
+	;;	
+	image)
+		echo "Creating diskimage (1GB)..."
+		dd if=/dev/zero of=$KIT/disk.img bs=1M count=0 seek=1024
+		$BIN/mke2fs -F $KIT/disk.img
+		echo "Done."
+	;;	
+	setup)
+		echo "Writing config files to debian system..."
+		echo "deb http://$SRC $DST main" > $MNT/etc/apt/sources.list
+		echo -e "domain local\nsearch local\n" >> $MNT/etc/resolv.conf
+		echo -e "# DNS Google\nnameserver 8.8.8.8\nnameserver 8.8.4.4\n" >> $MNT/etc/resolv.conf
+		echo debian > $MNT/etc/debian_chroot
+		echo "Done."
+	;;
+	chroot)
+		echo "Setting variables..."
+		export TMPDIR=/tmp
+		export USER=root
+		export HOME=/root
+		export SHELL=/bin/bash
+		export TERM=linux
+		export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/sbin:/usr/local/bin
+		export LC_ALL=C
+		export LANGUAGE=C
+		export LANG=C
+		echo "Done. Chrooting into debian..."
+		$BIN/busybox chroot $MNT /bin/bash
+	;;
+	esac
+}
+
+debootstrap_sys()
+{
+	case "$1" in
+	one)
+		echo "Going into stage one of debootstrapping the new system..."
+		$BS/usr/sbin/debootstrap --verbose --no-check-gpg --foreign --arch=armhf --extractor=ar --include=locales,sudo,man-db $DST $MNT http://$SRC
+		echo "Done."
+	;;	
+	two)
+		echo "Going into stage two of debootstrapping the new system..."
+		$BIN/busybox chroot $MNT /bin/sh -c '/debootstrap/debootstrap --second-stage'
+		echo "Done."
+	;;
+	esac
+}
+
+
+mount_sys()
+{
+	case "$1" in
+	root)
+		echo "Mounting system onto $MNT..."
+		$BIN/busybox mknod /dev/block/loop99 b 7 100
+		$BIN/busybox losetup /dev/block/loop99 $KIT/disk.img
+		$BIN/busybox mount -t ext2 /dev/block/loop99 $MNT
+	;;
+	proc)
+		echo "Mounting proc..."
+		$BIN/busybox mount -t proc none $MNT/proc
+	;;
+	sys)
+		echo "Mounting sys..."
+		$BIN/busybox mount -t sysfs none $MNT/sys
+	;;
+	dev)
+		echo "Mounting dev..."
+		$BIN/busybox mount -o bind /dev $MNT/dev
+		$BIN/busybox mount -t devpts none $MNT/dev/pts	
+	;;
+	esac
+}
+
+umount_sys()
+{
+	case "$1" in
+	dev)
+		echo "Unmounting dev..."
+		$BIN/busybox umount $MNT/dev/pts
+		$BIN/busybox umount $MNT/dev
+	;;
+	sys)
+		echo "Unmounting sys..."
+		$BIN/busybox umount $MNT/sys
+	;;
+	proc)
+		echo "Unmounting proc..."
+		$BIN/busybox umount $MNT/proc
+	;;
+	root)
+		echo "Unmounting $MNT..."
+		$BIN/busybox umount $MNT
+	;;
+	esac
+}
+
+case "$1" in
+install)
+	setup_sys system
+	setup_sys debootstrap
+	setup_sys busybox
+	setup_sys image
+	mount_sys root
+	debootstrap_sys one
+	debootstrap_sys two
+	setup_sys setup
+	umount_sys root
+	echo "Done! first use: ./linux.sh mount"
+;;
+setup)
+	setup_sys setup
+;;
+mount)
+	mount_sys root
+	mount_sys dev
+	mount_sys sys
+	mount_sys proc
+	echo "Done."
+;;
+umount)
+	umount_sys dev
+	umount_sys sys
+	umount_sys proc
+	umount_sys root
+	echo "Done."
+;;
+chroot)
+	setup_sys chroot
+;;
+*)
+	echo "Debkit Debian on Android Installation Kit"
+	echo "Usage: ./linux.sh <parameter>"
+;;
+esac
