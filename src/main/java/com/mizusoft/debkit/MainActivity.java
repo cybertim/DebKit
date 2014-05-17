@@ -20,6 +20,8 @@ import java.io.InputStream;
 public class MainActivity extends Activity {
 
     private String text = "";
+    private String installPath;
+    private boolean ready = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +51,10 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(this, PrefActivity.class));
                 return true;
             case R.id.mount:
-                finish();
+                mount();
                 return true;
             case R.id.unmount:
-                finish();
+                umount();
                 return true;
             case R.id.install:
                 BackgroundTask task = new BackgroundTask();
@@ -72,26 +74,56 @@ public class MainActivity extends Activity {
     private void setup() {
         Shell shell = new Shell();
         if (shell.execute("ls /data/local")) {
-            boolean healthy = true;
             if (!copyAssets(R.raw.debootstrap, "debootstrap.tar")) {
-                healthy = false;
+                ready = false;
             }
             if (!copyAssets(R.raw.busybox, "busybox")) {
-                healthy = false;
+                ready = false;
             }
             if (!copyAssets(R.raw.pkgdetails, "pkgdetails")) {
-                healthy = false;
+                ready = false;
             }
             if (!copyAssets(R.raw.mke2fs, "mke2fs")) {
-                healthy = false;
+                ready = false;
             }
-            if (healthy) {
+            if (!copyAssets(R.raw.debkit, "debkit")) {
+                ready = false;
+            }
+            if (ready) {
                 print("Ready.\nSelect 'settings' to configure your chroot image and select 'install' from the menu to start the debootstrapping process.");
             } else {
                 print("No ready!\nOne or more files failed to be initialized. Please send a bugreport by using the 'Send Log' function in the menu.");
             }
         } else {
+            ready = false;
             print("You currently DO NOT have root!\nPlease root your device first.\nIf you don't know what this means and would like to know start with googling 'android root'.");
+        }
+    }
+
+    private void install() {
+        if (ready) {
+            Shell shell = new Shell();
+
+        } else {
+            print("Sorry, unable to install. Are you root?");
+        }
+    }
+
+    private void umount() {
+        if (ready) {
+            Shell shell = new Shell();
+            shell.execute(installPath + "/debkit umount");
+        } else {
+            print("Sorry, unable to install. Are you root?");
+        }
+    }
+
+    private void mount() {
+        if (ready) {
+            Shell shell = new Shell();
+            shell.execute(installPath + "/debkit mount");
+        } else {
+            print("Sorry, unable to install. Are you root?");
         }
     }
 
@@ -124,7 +156,12 @@ public class MainActivity extends Activity {
 
             File file = getFileStreamPath(filename);
             file.setExecutable(true);
+
+            if (installPath == null || installPath == "") {
+                installPath = file.getPath();
+            }
             print(file.getAbsolutePath());
+
         } catch (Exception e) {
             print(filename + " ... FAILED!");
             return false;

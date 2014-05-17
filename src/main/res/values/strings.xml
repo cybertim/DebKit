@@ -7,8 +7,12 @@
     <string name="prefs_boot_s">auto mount debian on systeem boot</string>
     
     <string name="prefs_cat_dist">Debian Settings</string>
+    <string name="prefs_path">Image Location</string>
+    <string name="prefs_path_s">directory where to write/read the chroot image file</string>    
+    <string name="prefs_src">Source Location</string>
+    <string name="prefs_src_s">http/ftp location of the debian mirror to use</string>    
     <string name="prefs_size">Image Size</string>
-    <string name="prefs_size_s">size in MB of the disk image</string>
+    <string name="prefs_size_s">size in MB of the chroot disk image</string>
     <string name="prefs_dist">Debian Distribution</string>
     <string name="prefs_dist_s">name of the distribution to install</string>
     

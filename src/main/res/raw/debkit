@@ -2,7 +2,7 @@
 # The configuration of this script.
 #
 # all the files that came with this package (base location)
-BIN=/data/local/debkit
+BIN=/data/data/com.mizusoft.debkit/files
 # location of the image (pref on SD being the biggest size)
 KIT=/sdcard/debian
 # distribution to install
@@ -25,13 +25,13 @@ setup_sys()
 	case "$1" in
 	system)
 		echo "Creating directory $KIT..."
-		$BIN/busybox mkdir $KIT
+		$BIN/busybox mkdir -R $KIT
 		echo "Creating directory $MNT..."
-		$BIN/busybox mkdir $MNT
+		$BIN/busybox mkdir -R $MNT
 		echo "Creating directory $BS..."
-		$BIN/busybox mkdir $BS
+		$BIN/busybox mkdir -R $BS
 		echo "Creating directory $BB..."
-		$BIN/busybox mkdir $BB
+		$BIN/busybox mkdir -R $BB
 	;;
 	busybox)
 		echo "Installing Busybox in $BB..."
@@ -40,8 +40,8 @@ setup_sys()
 		echo "Done."
 	;;
 	debootstrap)
-		echo "Installing Debootstrap in $BS..."
-		$BIN/busybox tar -C $BS -xvf $BIN/data.tar
+		echo "Installing debootstrap in $BS..."
+		$BIN/busybox tar -C $BS -xvf $BIN/debootstrap.tar
 		echo "Patching debootstrap to function properly on android..."
 		$BIN/busybox sed -i "474,476d" $BS/usr/sbin/debootstrap
 		$BIN/busybox sed -i "16i                DEBOOTSTRAP_DIR=$BS/usr/share/debootstrap" $BS/usr/sbin/debootstrap
@@ -52,21 +52,21 @@ setup_sys()
 		echo "Done."
 	;;	
 	image)
-		echo "Creating diskimage (1GB)..."
+		echo "Creating empty ext2 diskimage..."
 		dd if=/dev/zero of=$KIT/disk.img bs=1M count=0 seek=1024
 		$BIN/mke2fs -F $KIT/disk.img
 		echo "Done."
 	;;	
 	setup)
-		echo "Writing config files to debian system..."
+		echo "Writing basic config files to debian system..."
 		echo "deb http://$SRC $DST main" > $MNT/etc/apt/sources.list
 		echo -e "domain local\nsearch local\n" >> $MNT/etc/resolv.conf
 		echo -e "# DNS Google\nnameserver 8.8.8.8\nnameserver 8.8.4.4\n" >> $MNT/etc/resolv.conf
-		echo debian > $MNT/etc/debian_chroot
+		echo debkit > $MNT/etc/debian_chroot
 		echo "Done."
 	;;
 	chroot)
-		echo "Setting variables..."
+		echo "Setting up the environment..."
 		export TMPDIR=/tmp
 		export USER=root
 		export HOME=/root
@@ -76,7 +76,7 @@ setup_sys()
 		export LC_ALL=C
 		export LANGUAGE=C
 		export LANG=C
-		echo "Done. Chrooting into debian..."
+		echo "chroot into debian..."
 		$BIN/busybox chroot $MNT /bin/bash
 	;;
 	esac
@@ -158,7 +158,7 @@ install)
 	debootstrap_sys two
 	setup_sys setup
 	umount_sys root
-	echo "Done! first use: ./linux.sh mount"
+	echo "Done! You chroot image is ready."
 ;;
 setup)
 	setup_sys setup
@@ -182,6 +182,6 @@ chroot)
 ;;
 *)
 	echo "Debkit Debian on Android Installation Kit"
-	echo "Usage: ./linux.sh <parameter>"
+	echo "Usage: ./debkit <parameter>"
 ;;
 esac

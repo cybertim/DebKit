@@ -11,6 +11,11 @@
      
     <PreferenceCategory android:title="@string/prefs_cat_dist" >
         <EditTextPreference
+            android:title="@string/prefs_path"
+            android:summary="@string/prefs_path_s"
+            android:defaultValue="/sdcard/debian"            
+            android:key="prefPath"/>
+        <EditTextPreference
             android:title="@string/prefs_size"
             android:summary="@string/prefs_size_s"
             android:defaultValue="1024"
@@ -23,6 +28,11 @@
             android:defaultValue="wheezy"
             android:entries="@array/debianDistributions"
             android:entryValues="@array/debianDistributions"/>
+        <EditTextPreference
+            android:title="@string/prefs_src"
+            android:summary="@string/prefs_src_s"
+            android:defaultValue="ftp.nl.debian.org/debian"
+            android:key="prefSrc"/>
     </PreferenceCategory>
 
 </PreferenceScreen>
