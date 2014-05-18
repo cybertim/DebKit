@@ -157,10 +157,11 @@ public class MainActivity extends Activity {
             File file = getFileStreamPath(filename);
             file.setExecutable(true);
 
-            if (installPath == null || installPath == "") {
-                installPath = file.getPath();
+            if (this.installPath == null || "".equals(this.installPath)) {
+                this.installPath = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf(File.separator));
+                print("Install path: " + installPath);
             }
-            print(file.getAbsolutePath());
+            print(filename + " ... OK.");
 
         } catch (Exception e) {
             print(filename + " ... FAILED!");

@@ -1,11 +1,8 @@
 package com.mizusoft.debkit;
 
-import android.util.Log;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 /**
  *
@@ -20,25 +17,35 @@ public class Shell {
         boolean result = true;
         try {
             // start 'su' process
-            Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", "system/bin/sh"});
+            Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", "/data/data/com.mizusoft.com/files/busybox ash"});
             // open all streams
             DataOutputStream stdin = new DataOutputStream(process.getOutputStream());
 
-            stdin.writeBytes(cmnd + "\n");
+            stdin.writeBytes(cmnd + " 2>&1\n");
             stdin.flush();
             stdin.close();
 
             // grab outputs
-            InputStream stdout = process.getInputStream();
-            byte[] buffer = new byte[BUFF_LEN];
-            int read;
-            while (true) {
-                read = stdout.read(buffer);
-                this.log += new String(buffer, 0, read);
-                if (read < BUFF_LEN) {
-                    break;
+            final InputStream stdout = process.getInputStream();
+            new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    byte[] buffer = new byte[BUFF_LEN];
+                    int read;
+                    while (true) {
+                        try {
+                            read = stdout.read(buffer);
+                        } catch (IOException ioe) {
+                            break;
+                        }
+                        log += new String(buffer, 0, read);
+                        if (read < BUFF_LEN) {
+                            break;
+                        }
+                    }
                 }
-            }
+            }).start();
 
             // wait for the process to finish
             process.waitFor();
