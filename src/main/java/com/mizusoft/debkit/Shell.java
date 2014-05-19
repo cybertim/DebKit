@@ -72,7 +72,9 @@ public class Shell extends AsyncTask<String, String, Boolean> {
     @Override
     protected void onProgressUpdate(String... values) {
         for (String s : values) {
-            parent.print(s);
+            if (parent != null) {
+                parent.print(s);
+            }
         }
     }
 

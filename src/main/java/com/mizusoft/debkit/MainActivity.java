@@ -19,22 +19,22 @@ import java.io.InputStream;
  * @author Tim
  */
 public class MainActivity extends Activity {
-    
+
     private final static String MSG_NO_ROOT = "You currently DO NOT have root!\nPlease root your device first.\nIf you don't know what this means and would like to know start with googling 'android root'.";
     private final static String MSG_BUSY = "There is another process running at the moment. Please let it finish before doing something else.";
     private String text = "";
     private String installPath;
     private boolean ready = true;
     private boolean busy = false;
-    private SharedPreferences sharedPref;    
-    
+    private SharedPreferences sharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         this.sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         this.sharedPref.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            
+
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sp, String string) {
                 configure();
@@ -49,23 +49,22 @@ public class MainActivity extends Activity {
         // execute the setup-method if there is root available (by ls'ing a priv directory as su -test)
         Shell shell = new Shell(this);
         shell.setShellExec(new ShellExec() {
-            
+
             @Override
             public void execute(MainActivity p, boolean r) {
                 p.setup(r);
-                configure();
             }
         });
         shell.execute("ls /data/local > /dev/null");
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         return true;
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -88,13 +87,16 @@ public class MainActivity extends Activity {
                 return super.onOptionsItemSelected(item);
         }
     }
-    
+
     public void print(String s) {
-        this.text += "\n" + s;
+        if (!this.text.endsWith("\n")) {
+            this.text += "\n";
+        }
+        this.text += s;
         final TextView myTextView = (TextView) findViewById(R.id.console);
         myTextView.setText(this.text);
     }
-    
+
     public void setup(boolean r) {
         if (r) {
             if (!copyAssets(R.raw.debootstrap, "debootstrap.tar")) {
@@ -113,7 +115,8 @@ public class MainActivity extends Activity {
                 ready = false;
             }
             if (ready) {
-                print("Ready.\nSelect 'settings' to configure your chroot image and select 'install' from the menu to start the debootstrapping process.");
+                print("Select 'settings' to configure your chroot image and select 'install' from the menu to start the debootstrapping process.");
+                configure();
             } else {
                 print("No ready!\nOne or more files failed to be initialized.");
             }
@@ -122,11 +125,11 @@ public class MainActivity extends Activity {
             print(MSG_NO_ROOT);
         }
     }
-    
+
     private void configure() {
         Shell shell = new Shell(this);
         shell.setShellExec(new ShellExec() {
-            
+
             @Override
             public void execute(MainActivity parent, boolean result) {
                 if (result) {
@@ -149,14 +152,14 @@ public class MainActivity extends Activity {
                 "echo 'SRC=" + prefSrc + "' >" + c,
                 "echo 'SIZ=" + prefSize + "' >" + c);
     }
-    
+
     private void install() {
         if (ready && !busy) {
             // be sure to not let the user start >1 instances of the install process.
             busy = true;
             Shell shell = new Shell(this);
             shell.setShellExec(new ShellExec() {
-                
+
                 @Override
                 public void execute(MainActivity parent, boolean result) {
                     busy = false;
@@ -171,7 +174,7 @@ public class MainActivity extends Activity {
             }
         }
     }
-    
+
     private void umount() {
         if (ready) {
             Shell shell = new Shell(this);
@@ -180,7 +183,7 @@ public class MainActivity extends Activity {
             print(MSG_NO_ROOT);
         }
     }
-    
+
     private void mount() {
         if (ready) {
             Shell shell = new Shell(this);
@@ -189,7 +192,7 @@ public class MainActivity extends Activity {
             print(MSG_NO_ROOT);
         }
     }
-    
+
     private boolean copyAssets(int id, String filename) {
         try {
             InputStream ins = getResources().openRawResource(id);
@@ -199,16 +202,17 @@ public class MainActivity extends Activity {
             FileOutputStream fos = openFileOutput(filename, Context.MODE_PRIVATE);
             fos.write(buffer);
             fos.close();
-            
+
             File file = getFileStreamPath(filename);
             file.setExecutable(true);
-            
+
             if (this.installPath == null || "".equals(this.installPath)) {
                 this.installPath = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf(File.separator));
+                this.sharedPref.edit().putString("installPath", installPath).commit();
                 print("Install path: " + installPath);
             }
             print(filename + " ... OK.");
-            
+
         } catch (Exception e) {
             print(filename + " ... FAILED!");
             return false;
