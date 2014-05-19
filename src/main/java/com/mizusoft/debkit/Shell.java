@@ -1,68 +1,79 @@
 package com.mizusoft.debkit;
 
+import android.os.AsyncTask;
+import android.util.Log;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  *
  * @author Tim
  */
-public class Shell {
+public class Shell extends AsyncTask<String, String, Boolean> {
 
-    private String log = "";
-    private final static int BUFF_LEN = 1024;
+    private final MainActivity parent;
+    private ShellExec shellExec = null;
 
-    public boolean execute(String cmnd) {
+    public void setShellExec(ShellExec shellExec) {
+        this.shellExec = shellExec;
+    }
+
+    public Shell(MainActivity parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    protected Boolean doInBackground(String... paramss) {
+        int count = paramss.length;
         boolean result = true;
-        try {
-            // start 'su' process
-            Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", "/data/data/com.mizusoft.com/files/busybox ash"});
-            // open all streams
-            DataOutputStream stdin = new DataOutputStream(process.getOutputStream());
+        for (int i = 0; i < count; i++) {
+            String param = paramss[i];
+            try {
+                Runtime terminal = (Runtime) Runtime.getRuntime();
+                Process process = terminal.exec("su");
+                DataOutputStream stdout = new DataOutputStream(process.getOutputStream());
+                stdout.writeBytes(param + "\n");
+                stdout.flush();
+                stdout.close();
 
-            stdin.writeBytes(cmnd + " 2>&1\n");
-            stdin.flush();
-            stdin.close();
-
-            // grab outputs
-            final InputStream stdout = process.getInputStream();
-            new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    byte[] buffer = new byte[BUFF_LEN];
-                    int read;
-                    while (true) {
-                        try {
-                            read = stdout.read(buffer);
-                        } catch (IOException ioe) {
-                            break;
-                        }
-                        log += new String(buffer, 0, read);
-                        if (read < BUFF_LEN) {
-                            break;
-                        }
-                    }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                int n;
+                char[] buffer = new char[1024];
+                while ((n = reader.read(buffer)) != -1) {
+                    //log += String.valueOf(buffer, 0, n);
+                    publishProgress(String.valueOf(buffer, 0, n));
                 }
-            }).start();
 
-            // wait for the process to finish
-            process.waitFor();
-            if (process.exitValue() != 0) {
+                process.waitFor();
+                if (process.exitValue() != 0) {
+                    result = false;
+                }
+                stdout.close();
+            } catch (IOException ioException) {
+                Log.e(Shell.class.getName(), ioException.getMessage());
+                result = false;
+            } catch (InterruptedException interruptedException) {
+                Log.e(Shell.class.getName(), interruptedException.getMessage());
                 result = false;
             }
-
-            stdin.close();
-        } catch (Exception exception) {
-            this.log += exception.getMessage() + "\n";
-            result = false;
         }
         return result;
     }
 
-    public String getLog() {
-        return this.log;
+    @Override
+    protected void onPostExecute(Boolean result) {
+        if (shellExec != null) {
+            shellExec.execute(parent, result);
+        }
+    }
+
+    @Override
+    protected void onProgressUpdate(String... values) {
+        for (String s : values) {
+            parent.print(s);
+        }
     }
 
 }

@@ -13,7 +13,7 @@
         <EditTextPreference
             android:title="@string/prefs_path"
             android:summary="@string/prefs_path_s"
-            android:defaultValue="/sdcard/debian"            
+            android:defaultValue="/sdcard/debkit"            
             android:key="prefPath"/>
         <EditTextPreference
             android:title="@string/prefs_size"

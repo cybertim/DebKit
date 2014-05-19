@@ -2,13 +2,16 @@
 # The configuration of this script.
 #
 # all the files that came with this package (base location)
-BIN=/data/data/com.mizusoft.debkit/files
+#BIN=/data/data/com.mizusoft.debkit/files
 # location of the image (pref on SD being the biggest size)
-KIT=/sdcard/debian
+#KIT=/sdcard/debian
 # distribution to install
-DST=wheezy
+#DST=wheezy
 # the debian source to use
-SRC=ftp.nl.debian.org/debian
+#SRC=ftp.nl.debian.org/debian
+
+source $(dirname $0)/config
+
 # mount location of the image
 MNT=$BIN/mnt
 # where to install the busybox tools
@@ -25,13 +28,13 @@ setup_sys()
 	case "$1" in
 	system)
 		echo "Creating directory $KIT..."
-		$BIN/busybox mkdir -R $KIT
+		$BIN/busybox mkdir -p $KIT
 		echo "Creating directory $MNT..."
-		$BIN/busybox mkdir -R $MNT
+		$BIN/busybox mkdir -p $MNT
 		echo "Creating directory $BS..."
-		$BIN/busybox mkdir -R $BS
+		$BIN/busybox mkdir -p $BS
 		echo "Creating directory $BB..."
-		$BIN/busybox mkdir -R $BB
+		$BIN/busybox mkdir -p $BB
 	;;
 	busybox)
 		echo "Installing Busybox in $BB..."
@@ -53,7 +56,7 @@ setup_sys()
 	;;	
 	image)
 		echo "Creating empty ext2 diskimage..."
-		dd if=/dev/zero of=$KIT/disk.img bs=1M count=0 seek=1024
+		dd if=/dev/zero of=$KIT/disk.img bs=1M count=0 seek=$SIZ
 		$BIN/mke2fs -F $KIT/disk.img
 		echo "Done."
 	;;	
