@@ -26,9 +26,9 @@ public class BootReceiver extends BroadcastReceiver {
                     @Override
                     public void execute(MainActivity parent, boolean result) {
                         if (result) {
-                            Toast.makeText(cntxt, "DebKit is mounted", Toast.LENGTH_SHORT);
+                            Toast.makeText(cntxt, "DebKit is mounted", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(cntxt, "DebKit failed to mount!", Toast.LENGTH_SHORT);
+                            Toast.makeText(cntxt, "DebKit failed to mount!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
