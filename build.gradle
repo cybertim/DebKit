@@ -1,0 +1,30 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.9.2'
+    }
+}
+
+apply plugin: 'android'
+
+android {
+    buildToolsVersion "19.0.3"
+    compileSdkVersion 19
+    defaultConfig {
+        minSdkVersion 11
+    }    
+    lintOptions {
+        abortOnError false
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "joda-time:joda-time:2.3"
+}

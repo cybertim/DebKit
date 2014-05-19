@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <PreferenceCategory android:title="@string/prefs_cat_app" >
+        <CheckBoxPreference
+            android:title="@string/prefs_boot"
+            android:summary="@string/prefs_boot_s"
+            android:defaultValue="false"
+            android:key="prefBoot" />        
+    </PreferenceCategory>
+     
+    <PreferenceCategory android:title="@string/prefs_cat_dist" >
+        <EditTextPreference
+            android:title="@string/prefs_path"
+            android:summary="@string/prefs_path_s"
+            android:defaultValue="/sdcard/debkit"            
+            android:key="prefPath"/>
+        <EditTextPreference
+            android:title="@string/prefs_size"
+            android:summary="@string/prefs_size_s"
+            android:defaultValue="1024"
+            android:inputType="number"
+            android:key="prefSize"/>
+        <ListPreference
+            android:key="prefDebianDistribution"
+            android:title="@string/prefs_dist"
+            android:summary="@string/prefs_dist_s"
+            android:defaultValue="wheezy"
+            android:entries="@array/debianDistributions"
+            android:entryValues="@array/debianDistributions"/>
+        <EditTextPreference
+            android:title="@string/prefs_src"
+            android:summary="@string/prefs_src_s"
+            android:defaultValue="ftp.nl.debian.org/debian"
+            android:key="prefSrc"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

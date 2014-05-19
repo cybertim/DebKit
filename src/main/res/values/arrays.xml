@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="debianDistributions">
+        <item name="1">jessie</item>
+        <item name="7">wheezy</item>
+        <item name="3">squeeze</item>
+    </string-array>
+</resources>
