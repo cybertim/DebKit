@@ -10,6 +10,10 @@
           android:title="@string/menu_mount"/>
     <item android:id="@+id/unmount"
           android:title="@string/menu_unmount"/>
+    <item android:id="@+id/help"
+          android:title="@string/menu_help"/>    
+    <item android:id="@+id/bugreport"
+          android:title="@string/menu_bugreport"/>    
     <item android:id="@+id/quit"
           android:title="@string/menu_quit"/>
 </menu>

@@ -78,6 +78,14 @@ setup_sys()
 		echo "chrooting into the debkit..."
 		$BIN/busybox chroot $MNT /bin/bash
 	;;
+        link)
+                echo "Making /system RW..."
+                $BIN/busybox mount -o rw,remount /system
+                echo "Linking debkit into /system/xbin..."
+                $BIN/busybox ln -s $BIN/debkit /system/xbin/debkit
+                echo "Making /system RO..."
+                $BIN/busybox mount -o ro,remount /system                
+        ;;
 	esac
 }
 
@@ -148,16 +156,25 @@ umount_sys()
 
 case "$1" in
 install)
-	setup_sys system
-	setup_sys debootstrap
-	setup_sys busybox
-	setup_sys image
-	mount_sys root
-	debootstrap_sys one
-	debootstrap_sys two
-	setup_sys setup
-	umount_sys root
-	echo "Done! You chroot image is ready."
+        mount | grep "/dev/block/loop99 $MNT" > /dev/null
+        if [ $? -eq 0 ]
+        then
+            echo "System is already mounted!"
+            echo "Umount first before installing again!"
+        else
+            setup_sys system
+            setup_sys debootstrap
+            setup_sys busybox
+            setup_sys image
+            mount_sys root
+            debootstrap_sys one
+            debootstrap_sys two
+            setup_sys setup
+            umount_sys root
+            setup_sys link
+            echo "Done! You chroot image is ready."
+            echo "Don't forget to mount or auto-mount the image before chrooting (see help)."
+        fi    
 ;;
 setup)
 	setup_sys setup

@@ -26,38 +26,36 @@ public class Shell extends AsyncTask<String, String, Boolean> {
 
     @Override
     protected Boolean doInBackground(String... paramss) {
-        int count = paramss.length;
         boolean result = true;
-        for (int i = 0; i < count; i++) {
-            String param = paramss[i];
-            try {
-                Runtime terminal = (Runtime) Runtime.getRuntime();
-                Process process = terminal.exec("su");
-                DataOutputStream stdout = new DataOutputStream(process.getOutputStream());
-                stdout.writeBytes(param + "\n");
-                stdout.flush();
-                stdout.close();
+        try {
+            Runtime terminal = (Runtime) Runtime.getRuntime();
+            Process process = terminal.exec("su");
+            DataOutputStream stdout = new DataOutputStream(process.getOutputStream());
+            int count = paramss.length;
+            for (int i = 0; i < count; i++) {
+                stdout.writeBytes(paramss[i] + "\n");
+            }
+            stdout.flush();
+            stdout.close();
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                int n;
-                char[] buffer = new char[1024];
-                while ((n = reader.read(buffer)) != -1) {
-                    //log += String.valueOf(buffer, 0, n);
-                    publishProgress(String.valueOf(buffer, 0, n));
-                }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            int n;
+            char[] buffer = new char[1024];
+            while ((n = reader.read(buffer)) != -1) {
+                publishProgress(String.valueOf(buffer, 0, n));
+            }
 
-                process.waitFor();
-                if (process.exitValue() != 0) {
-                    result = false;
-                }
-                stdout.close();
-            } catch (IOException ioException) {
-                Log.e(Shell.class.getName(), ioException.getMessage());
-                result = false;
-            } catch (InterruptedException interruptedException) {
-                Log.e(Shell.class.getName(), interruptedException.getMessage());
+            process.waitFor();
+            if (process.exitValue() != 0) {
                 result = false;
             }
+            stdout.close();
+        } catch (IOException ioException) {
+            Log.e(Shell.class.getName(), ioException.getMessage());
+            result = false;
+        } catch (InterruptedException interruptedException) {
+            Log.e(Shell.class.getName(), interruptedException.getMessage());
+            result = false;
         }
         return result;
     }

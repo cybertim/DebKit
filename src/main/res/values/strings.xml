@@ -20,6 +20,30 @@
     <string name="menu_install">Install</string>
     <string name="menu_mount">Mount</string>
     <string name="menu_unmount">Unmount</string>
+    <string name="menu_bugreport">Bug Report</string>
+    <string name="menu_help">Help</string>    
+    <string name="menu_close">Close</string>    
     <string name="menu_quit">Exit</string>
+    
+    <string name="search_market">Install Terminal Application</string>
+    <string name="help_intro">
+            After installing <b>DebKit</b> you need to:\n
+            -<b>su</b> to become a superuser\n
+            -<b>debkit mount</b> the image\n            
+            -<b>debkit chroot</b> into the image\n
+            To do this you will need to...\n
+    </string>
+    <string name="help_term">
+        After installing a <b>terminal</b> open the application and type:\n
+        \n
+        <tt>shell@localhost$ su</tt>\n
+        <tt>shell@localhost# debkit mount</tt>\n
+        <tt>shell@localhost# debkit chroot</tt>\n
+        \n
+        <b>!</b>You can mount or enable the automatic mount option in this App so you can skip the second step.\n
+        <b>!</b>Don\'t forget to:\n
+        <tt>shell@localhost# debkit umount</tt>\n
+        before uninstalling the App or re-installing the chroot image!
+    </string>
     
 </resources>
