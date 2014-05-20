@@ -83,6 +83,7 @@ setup_sys()
                 $BIN/busybox mount -o rw,remount /system
                 echo "Linking debkit into /system/xbin..."
                 $BIN/busybox ln -s $BIN/debkit /system/xbin/debkit
+                $BIN/busybox ln -s $BIN/config /system/xbin/config
                 echo "Making /system RO..."
                 $BIN/busybox mount -o ro,remount /system                
         ;;
@@ -178,6 +179,7 @@ install)
 ;;
 setup)
 	setup_sys setup
+        setup_sys link
 ;;
 mount)
 	mount_sys root
