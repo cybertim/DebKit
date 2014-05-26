@@ -12,6 +12,8 @@
           android:title="@string/menu_unmount"/>
     <item android:id="@+id/help"
           android:title="@string/menu_help"/>    
+    <item android:id="@+id/fix"
+           android:title="@string/menu_fix"/>
     <item android:id="@+id/bugreport"
           android:title="@string/menu_bugreport"/>    
     <item android:id="@+id/quit"

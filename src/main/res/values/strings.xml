@@ -20,19 +20,13 @@
     <string name="menu_install">Install</string>
     <string name="menu_mount">Mount</string>
     <string name="menu_unmount">Unmount</string>
+    <string name="menu_fix">Fix</string>
     <string name="menu_bugreport">Bug Report</string>
     <string name="menu_help">Help</string>    
     <string name="menu_close">Close</string>    
     <string name="menu_quit">Exit</string>
     
-    <string name="search_market">Install Terminal Application</string>
-    <string name="help_intro">
-            After installing <b>DebKit</b> you need to:\n
-            -<b>su</b> to become a superuser\n
-            -<b>debkit mount</b> the image\n            
-            -<b>debkit chroot</b> into the image\n
-            To do this you will need to...\n
-    </string>
+    <string name="search_market">First install a Terminal App</string>
     <string name="help_term">
         After installing a <b>terminal</b> open the application and type:\n
         \n
@@ -40,10 +34,15 @@
         <tt>shell@localhost# debkit mount</tt>\n
         <tt>shell@localhost# debkit chroot</tt>\n
         \n
-        <b>!</b>You can mount or enable the automatic mount option in this App so you can skip the second step.\n
-        <b>!</b>Don\'t forget to:\n
+        And when done and not planning of using <tt>chroot</tt> for a while just do:\n
+        \n
+        <tt>shell@localhost$ su</tt>\n
         <tt>shell@localhost# debkit umount</tt>\n
-        before uninstalling the App or re-installing the chroot image!
+        \n
+        <b>[!]</b>You can mount or enable the <i>automatic mount</i> option in this App so you can skip the \'<tt>debkit mount</tt>\' step.\n
+        <b>[!]</b>Also available are the <i>Mount</i> and <i>Umount</i> commands from the App menu instead of typing it in the terminal.\n
+        <b>[!]</b>Don\'t forget to \'<tt>debkit umount</tt>\' before uninstalling the App or re-installing the chroot image, else you will have to manually umount and remove the data directory.\n
+        <b>[!]</b>Use <i>Fix</i> from the App menu to reset the symlink to debkit if the command is not working anymore in a terminal.\n
     </string>
     
 </resources>

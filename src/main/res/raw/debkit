@@ -80,12 +80,12 @@ setup_sys()
 	;;
         link)
                 echo "Making /system RW..."
-                $BIN/busybox mount -o rw,remount /system
+                mount -o rw,remount /system
                 echo "Linking debkit into /system/xbin..."
                 $BIN/busybox ln -s $BIN/debkit /system/xbin/debkit
                 $BIN/busybox ln -s $BIN/config /system/xbin/config
                 echo "Making /system RO..."
-                $BIN/busybox mount -o ro,remount /system                
+                mount -o ro,remount /system                
         ;;
 	esac
 }
@@ -111,23 +111,23 @@ mount_sys()
 {
 	case "$1" in
 	root)
-		echo "Mounting system onto $MNT..."
+		echo "Mounting system onto $MNT..."		
 		$BIN/busybox mknod /dev/block/loop99 b 7 100
 		$BIN/busybox losetup /dev/block/loop99 $KIT/disk.img
-		$BIN/busybox mount -t ext2 /dev/block/loop99 $MNT
+		mount -t ext2 /dev/block/loop99 $MNT                
 	;;
 	proc)
 		echo "Mounting proc..."
-		$BIN/busybox mount -t proc none $MNT/proc
+		mount -t proc none $MNT/proc
 	;;
 	sys)
 		echo "Mounting sys..."
-		$BIN/busybox mount -t sysfs none $MNT/sys
+		mount -t sysfs none $MNT/sys
 	;;
 	dev)
 		echo "Mounting dev..."
-		$BIN/busybox mount -o bind /dev $MNT/dev
-		$BIN/busybox mount -t devpts none $MNT/dev/pts	
+		mount -o bind /dev $MNT/dev
+		mount -t devpts none $MNT/dev/pts	
 	;;
 	esac
 }
@@ -137,27 +137,27 @@ umount_sys()
 	case "$1" in
 	dev)
 		echo "Unmounting dev..."
-		$BIN/busybox umount $MNT/dev/pts
-		$BIN/busybox umount $MNT/dev
+		umount $MNT/dev/pts
+		umount $MNT/dev
 	;;
 	sys)
 		echo "Unmounting sys..."
-		$BIN/busybox umount $MNT/sys
+		umount $MNT/sys
 	;;
 	proc)
 		echo "Unmounting proc..."
-		$BIN/busybox umount $MNT/proc
+		umount $MNT/proc
 	;;
 	root)
 		echo "Unmounting $MNT..."
-		$BIN/busybox umount $MNT
+		umount $MNT
 	;;
 	esac
 }
 
 case "$1" in
 install)
-        mount | grep "/dev/block/loop99 $MNT" > /dev/null
+        mount | grep "$MNT" > /dev/null
         if [ $? -eq 0 ]
         then
             echo "System is already mounted!"
@@ -178,7 +178,10 @@ install)
         fi    
 ;;
 setup)
-	setup_sys setup
+	setup_sys setup        
+;;
+link)
+        setup_sys system
         setup_sys link
 ;;
 mount)
@@ -196,7 +199,7 @@ umount)
 	echo "Done."
 ;;
 chroot)
-        mount | grep "/dev/block/loop99 $MNT" > /dev/null
+        mount | grep "$MNT" > /dev/null
         if [ $? -eq 0 ]
         then
             setup_sys chroot
